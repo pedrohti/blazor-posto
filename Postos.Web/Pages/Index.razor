@@ -1,9 +1,96 @@
-﻿@page "/"
+@page "/"
 
-<PageTitle>Index</PageTitle>
+@using System.Net.Http.Headers;
 
-<h1>Hello, world!</h1>
+@inject HttpClient Http
+@inject IConfiguration Configuration
+@inject IJSRuntime JsRuntime
 
-Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<div class="row">
+	<div class="col-md-12">
+		<div class="card">
+			<div class="card-body">
+				<h2>Buscar Postos</h2>
+				<p>Preencha os campos necessário para encontrar os melhores preços perto de você!</p>
+				<hr />
+
+				<Loading IsLoading="@isLoading" />
+
+				<div class="row mb-3">
+					<div class="col-md-3">
+						<label>Escolha o Estado:</label>
+						<InputSelect id="ddlState" class="form-select" @bind-Value="selectedState" @onclick="GetCitiesByUf">
+							@*@bind-Value="selectedState" @onchange="@((ChangeEventArgs __e) => selectedState = Convert.ToInt16(__e?.Value))"*@
+							<option value="0">Escolha</option>
+							@foreach (var item in states)
+							{
+								<option value="@item.Id">@item.Nome</option>
+							}
+						</InputSelect>
+						@*<span class="text-danger">
+						<ValidationMessage For="@(() => request.TipoId)" />
+						</span>*@
+					</div>
+					<label>@message</label>
+				</div>
+
+				<div class="row mb-3">
+					<div class="col-md-3">
+						<label>Escolha a Cidade:</label>
+						<InputSelect id="ddlCity" class="form-select" @bind-Value="selectedCity">
+							<option value="0">Escolha</option>
+							@foreach (var x in cities)
+							{
+								<option value="@x.Id">@x.Nome</option>
+							}
+						</InputSelect>
+						@*<span class="text-danger">
+						<ValidationMessage For="@(() => request.TipoId)" />
+						</span>*@
+					</div>
+				</div>
+
+
+
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+
+	private List<GenericResponse> states = new List<GenericResponse>();
+	private List<GenericResponse> cities = new List<GenericResponse>();
+	private int? selectedState = 0;
+	private int? selectedCity = 0;
+	private string? message;
+	private bool isLoading = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		
+		await GetStates();
+		
+	}
+
+	private async Task GetStates()
+	{
+		//GET States
+		var respState = await Http.GetAsync(Configuration["StatesURI"]);
+		if (respState.IsSuccessStatusCode)
+			states = await respState.Content.ReadFromJsonAsync<List<GenericResponse>>();
+	}
+
+	private async Task GetCitiesByUf()
+	{
+		
+		//GET Cities by UF
+		var respCities = await Http.GetAsync(Configuration["StatesURI"] + selectedState + "/distritos");
+		if (respCities.IsSuccessStatusCode)
+		{
+			//cities = new List<GenericResponse>();
+			cities = await respCities.Content.ReadFromJsonAsync<List<GenericResponse>>();
+		}
+	}
+}
