@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -18,7 +17,6 @@
     <link href="Postos.Web.styles.css" rel="stylesheet" />
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap"></script>
 </head>
-
 <body>
     <div id="app">
         <svg class="loading-progress">
@@ -27,25 +25,11 @@
         </svg>
         <div class="loading-progress-text"></div>
     </div>
-
-    <!--<div id="blazor-error-ui">
+    <div id="blazor-error-ui">
         An unhandled error has occurred.
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
-    </div>-->
-    <script src="_framework/blazor.webassembly.js"></script>
-
-    <script>
-        function initialize() {
-            var latlng = new google.maps.LatLng(40.716948, -74.003563);
-            var options = {
-                zoom: 14, center: latlng,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            };
-            var map = new google.maps.Map(document.getElementById("map"), options);
-        }
-    </script>
-
+    </div>
     <!-- Start Single Page Apps for GitHub Pages -->
     <script type="text/javascript">
         (function (l) {
@@ -66,7 +50,7 @@
         }(window.location))
     </script>
     <!-- End Single Page Apps for GitHub Pages -->
-
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
 </body>
-
 </html>
