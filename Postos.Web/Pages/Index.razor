@@ -18,6 +18,7 @@
 				<Loading IsLoading="@isLoading" />
 
 				<div class="row mb-3">
+
 					<div class="col-md-3">
 						<label>Escolha o Estado:</label>
 						<InputSelect id="ddlState" class="form-select" @bind-Value="selectedState" @onclick="GetCitiesByUf">
@@ -32,10 +33,7 @@
 						<ValidationMessage For="@(() => request.TipoId)" />
 						</span>*@
 					</div>
-					<label>@message</label>
-				</div>
 
-				<div class="row mb-3">
 					<div class="col-md-3">
 						<label>Escolha a Cidade:</label>
 						<InputSelect id="ddlCity" class="form-select" @bind-Value="selectedCity">
@@ -49,6 +47,11 @@
 						<ValidationMessage For="@(() => request.TipoId)" />
 						</span>*@
 					</div>
+				</div>
+
+				<div class="row mb-3">
+					<div id="map" style="height:500px;width:100%;"></div>
+					
 				</div>
 
 
@@ -69,15 +72,21 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		
 		await GetStates();
-		
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await JsRuntime.InvokeVoidAsync("initialize", null);
+		}
 	}
 
 	private async Task GetStates()
 	{
 		//GET States
-		var respState = await Http.GetAsync(Configuration["StatesURI"]);
+		var respState = await Http.GetAsync(Configuration["BaseIBGEURI"] + Configuration["StatesURI"]);
 		if (respState.IsSuccessStatusCode)
 			states = await respState.Content.ReadFromJsonAsync<List<GenericResponse>>();
 	}
@@ -86,7 +95,7 @@
 	{
 		
 		//GET Cities by UF
-		var respCities = await Http.GetAsync(Configuration["StatesURI"] + selectedState + "/distritos");
+		var respCities = await Http.GetAsync(Configuration["BaseIBGEURI"] + Configuration["StatesURI"] + selectedState + "/distritos");
 		if (respCities.IsSuccessStatusCode)
 		{
 			//cities = new List<GenericResponse>();
