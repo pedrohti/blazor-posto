@@ -21,11 +21,11 @@ jobs:
 
     # publishes Blazor project to the release-folder
     - name: Publish .NET Core Project
-      run: dotnet publish Postos.Web.csproj -c Release -o release --nologo
+      run: dotnet publish Postos.Web\Postos.Web.csproj -c Release -o release --nologo
 
     # changes the base-tag in index.html from '/' to 'Postos.Web' to match GitHub Pages repository subdirectory
     - name: Change base-tag in index.html from / to Postos.Web
-      run: sed -i 's/<base href="\/" \/>/<base href="\/Postos.Web\/" \/>/g' release/wwwroot/index.html
+      run: sed -i 's/<base href="\/" \/>/<base href="\/Postos.Web\/Postos.Web\/" \/>/g' release/wwwroot/index.html
 
     # changes the base-tag in index.html from '/' to 'Postos.Web' to match GitHub Pages repository subdirectory
     - name: Fix service-worker-assets.js hashes
