@@ -5,10 +5,11 @@ on:
   push:
     branches: [ main ]
 
+permissions: read-all|write-all
+
 jobs:
   deploy-to-github-pages:
-    
-    permissions: read-all|write-all
+
     # use ubuntu-latest image to run steps on
     runs-on: ubuntu-latest
     steps:
