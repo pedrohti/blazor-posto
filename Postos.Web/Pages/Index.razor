@@ -49,10 +49,9 @@
 					</div>
 				</div>
 
-				<div class="row mb-3">
+				@*<div class="row mb-3">
 					<div id="map" style="height:500px;width:100%;"></div>
-					
-				</div>
+				</div>*@
 
 
 
@@ -93,7 +92,7 @@
 
 	private async Task GetCitiesByUf()
 	{
-		
+
 		//GET Cities by UF
 		var respCities = await Http.GetAsync(Configuration["BaseIBGEURI"] + Configuration["StatesURI"] + selectedState + "/distritos");
 		if (respCities.IsSuccessStatusCode)
