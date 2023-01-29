@@ -10,13 +10,16 @@
     <!--<base href="/Postos.Web/" />-->
     <!--For LocalHost-->
     <!--<base href="/" />-->
-
     <!--<base href="/" />-->
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="Postos.Web.styles.css" rel="stylesheet" />
     <!--<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap"></script>-->
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+          crossorigin="" />
 </head>
 
 <body>
@@ -34,6 +37,9 @@
         <a class="dismiss">🗙</a>
     </div>-->
     <script src="_framework/blazor.webassembly.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+            crossorigin=""></script>
 
     <!--<script>
         function initialize() {
@@ -45,7 +51,6 @@
             var map = new google.maps.Map(document.getElementById("map"), options);
         }
     </script>-->
-
     <!-- Start Single Page Apps for GitHub Pages -->
     <!--<script type="text/javascript">
         (function (l) {

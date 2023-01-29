@@ -4,7 +4,9 @@
 
 @inject HttpClient Http
 @inject IConfiguration Configuration
-@inject IJSRuntime JsRuntime
+
+@inject IMarkerFactory MarkerFactor
+@inject IIconFactory IconFactory
 
 
 <div class="row">
@@ -21,7 +23,7 @@
 
 					<div class="col-md-3">
 						<label>Escolha o Estado:</label>
-						<InputSelect id="ddlState" class="form-select" @bind-Value="selectedState" @onclick="GetCitiesByUf">
+						<InputSelect id="ddlState" class="form-select" @bind-Value="selectedState" @onclick="OnClickState">
 							@*@bind-Value="selectedState" @onchange="@((ChangeEventArgs __e) => selectedState = Convert.ToInt16(__e?.Value))"*@
 							<option value="0">Escolha</option>
 							@foreach (var item in states)
@@ -49,9 +51,10 @@
 					</div>
 				</div>
 
-				@*<div class="row mb-3">
-					<div id="map" style="height:500px;width:100%;"></div>
-				</div>*@
+				<div class="row mb-3 map-wrapper">
+					<Map @ref="mapRef" MapOptions="@mapOptions" >
+					</Map>
+				</div>
 
 
 
@@ -60,27 +63,75 @@
 	</div>
 </div>
 
+<style>
+	#mapId {
+		height: 400px;
+	}
+</style>
+
+@inject IMarkerFactory MarkerFactory
+
 @code {
+	private string _googleMapsApiKey = "AIzaSyBZ62XvcPvtWfT-bYvkavJsdMHRc6cO1m0";
 
 	private List<GenericResponse> states = new List<GenericResponse>();
 	private List<GenericResponse> cities = new List<GenericResponse>();
+
 	private int? selectedState = 0;
+	private LatLng? selectedStateCoors = new LatLng(0,0);
+
 	private int? selectedCity = 0;
+	private LatLng? selectedCityCoords = new LatLng(0,0);
+
 	private string? message;
 	private bool isLoading = false;
 
+	#region MAP
+	private Map? mapRef;
+
+	private LatLng? center;
+	private LatLng? firstMarkerLatLng;
+	private LatLng? secondMarkerLatLng;
+	private LatLng? thirdMarkerLatLng;
+	private Marker? marker1;
+	private Marker? marker2;
+	private Marker? marker3;
+
+
+	private MapOptions mapOptions = new MapOptions()
+		{
+			DivId = "mapId",
+			Center = new LatLng(-14.235, -5.192),
+			Zoom = 13,
+			UrlTileLayer = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+			SubOptions = new MapSubOptions()
+			{
+				Attribution = "&copy; <a lhref='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
+				TileSize = 512,
+				ZoomOffset = -1,
+				MaxZoom = 19,
+			}
+		};
+	#endregion
+
 	protected override async Task OnInitializedAsync()
 	{
+		center = new LatLng(50.279133, 18.685578);
+		firstMarkerLatLng = new LatLng(50.284324, 18.664683);
+		secondMarkerLatLng = new LatLng(50.285495, 18.691064);
+		thirdMarkerLatLng = new LatLng(50.279103, 18.685534);
+
 		await GetStates();
+		await AddMarkers();
 	}
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
+	private async Task AddMarkers()
 	{
-		if (firstRender)
-		{
-			await JsRuntime.InvokeVoidAsync("initialize", null);
-		}
+		this.marker1 = await MarkerFactory.CreateAndAddToMap(this.firstMarkerLatLng, this.mapRef);
+		this.marker2 = await MarkerFactory.CreateAndAddToMap(this.secondMarkerLatLng, this.mapRef);
+		this.marker3 = await MarkerFactory.CreateAndAddToMap(this.thirdMarkerLatLng, this.mapRef);
 	}
+
 
 	private async Task GetStates()
 	{
@@ -88,6 +139,12 @@
 		var respState = await Http.GetAsync(Configuration["BaseIBGEURI"] + Configuration["StatesURI"]);
 		if (respState.IsSuccessStatusCode)
 			states = await respState.Content.ReadFromJsonAsync<List<GenericResponse>>();
+	}
+
+	private async Task OnClickState()
+	{
+		cities = new List<GenericResponse>();
+		await GetCitiesByUf();
 	}
 
 	private async Task GetCitiesByUf()
@@ -99,6 +156,94 @@
 		{
 			//cities = new List<GenericResponse>();
 			cities = await respCities.Content.ReadFromJsonAsync<List<GenericResponse>>();
+		}
+	}
+
+	private async Task GetStateLatLong(int? id)
+	{
+		switch (selectedState)
+		{
+			case 11:
+				new LatLng(-115057341, -63580611);
+				break;
+			case 12:
+				new LatLng(326088213, -8547896759999990);
+				break;
+			case 13:
+				new LatLng(-34168427, -658560646);
+				break;
+			case 14:
+				new LatLng(15957682, -6058206759999990);
+				break;
+			case 15:
+				new LatLng(-6207102, -5270279559999990);
+				break;
+			case 16:
+				new LatLng(14441146, -520215415);
+				break;
+			case 17:
+				new LatLng(-114098737, -4871914229999990);
+				break;
+			case 21:
+				new LatLng(-5080419, -456007108);
+				break;
+			case 22:
+				new LatLng(-8322948799999990, -431747162);
+				break;
+			case 23:
+				new LatLng(-54983977, -393206241);
+				break;
+			case 24:
+				new LatLng(-5402580299999990, -36954107);
+				break;
+			case 25:
+				new LatLng(-7239960900000000, -367819505);
+				break;
+			case 26:
+				new LatLng(-88137173, -36954107);
+				break;
+			case 27:
+				new LatLng(-95713058, -367819505);
+				break;
+			case 28:
+				new LatLng(-106738878, -374681396);
+				break;
+			case 29:
+				new LatLng(-114098737, -412808577);
+				break;
+			case 31:
+				new LatLng(-17930178, -437908453);
+				break;
+			case 32:
+				new LatLng(-191834229, -403088626);
+				break;
+			case 33:
+				new LatLng(-229068467, -431728965);
+				break;
+			case 35:
+				new LatLng(-235557714, -466395571);
+				break;
+			case 41:
+				new LatLng(-252520888, -520215415);
+				break;
+			case 42:
+				new LatLng(-26928572, -4936531489999990);
+				break;
+			case 43:
+				new LatLng(-293646459, -516657692);
+				break;
+			case 50:
+				new LatLng(-207722295, -547851531);
+				break;
+			case 51:
+				new LatLng(-126818712, -56921099);
+				break;
+			case 52:
+				new LatLng(-157050424, -4936531489999990);
+				break;
+			case 53:
+				new LatLng(-157975154, -4789188739999990);
+				break;
 		}
 	}
 }
