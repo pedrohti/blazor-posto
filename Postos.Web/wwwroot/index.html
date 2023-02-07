@@ -5,21 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Postos.Web</title>
-
-    <!--For Publish To GitHub Pages-->
-    <!--<base href="/Postos.Web/" />-->
-    <!--For LocalHost-->
-    <!--<base href="/" />-->
-    <!--<base href="/" />-->
+    <base href="/" />
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="Postos.Web.styles.css" rel="stylesheet" />
-    <!--<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap"></script>-->
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-          crossorigin="" />
+    <!--<script async type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCB1T9fH2zNl6W_YEQKzsn7a-Ozoacnl4U" async defer></script>-->
 </head>
 
 <body>
@@ -37,20 +28,20 @@
         <a class="dismiss">🗙</a>
     </div>-->
     <script src="_framework/blazor.webassembly.js"></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-            crossorigin=""></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCB1T9fH2zNl6W_YEQKzsn7a-Ozoacnl4U&callback=initialize" async defer></script>
 
-    <!--<script>
+    <script>
         function initialize() {
-            var latlng = new google.maps.LatLng(40.716948, -74.003563);
+            var latlng = new google.maps.LatLng(-14.235, -5.192);
+            //var latlng = new google.maps.LatLng(40.716948, -74.003563);
             var options = {
                 zoom: 14, center: latlng,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
             var map = new google.maps.Map(document.getElementById("map"), options);
+            console.log(map);
         }
-    </script>-->
+    </script>
     <!-- Start Single Page Apps for GitHub Pages -->
     <!--<script type="text/javascript">
         (function (l) {

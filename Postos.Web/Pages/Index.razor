@@ -4,10 +4,7 @@
 
 @inject HttpClient Http
 @inject IConfiguration Configuration
-
-@inject IMarkerFactory MarkerFactor
-@inject IIconFactory IconFactory
-
+@inject IJSRuntime JSRuntime
 
 <div class="row">
 	<div class="col-md-12">
@@ -52,8 +49,17 @@
 				</div>
 
 				<div class="row mb-3 map-wrapper">
-					<Map @ref="mapRef" MapOptions="@mapOptions" >
-					</Map>
+					@*<GoogleMap @bind-Center="_jsMapCenter" @bind-Center:event="OnMapCenterChanged"
+							   @bind-Zoom="_jsMapZoomLevel" @bind-Zoom:event="OnMapZoomLevelChanged"
+							   OnMapInitialized="@(() => {})"
+							   Markers="@_jsMarkers"
+							   ApiKey="@_googleMapsApiKey" />*@
+					@*<GoogleStaticMap ApiKey="@apiKey"
+					Center="@(new GeolocationData("Brasil"))"
+					ZoomLevel="3" />*@
+					@*<div id="map" style="height: 90vh; width: 100%;"></div>*@
+					<div id="map" style="width: auto; height: 550px; position: relative; overflow: hidden;"></div>
+
 				</div>
 
 
@@ -69,65 +75,97 @@
 	}
 </style>
 
-@inject IMarkerFactory MarkerFactory
-
 @code {
 	private List<GenericResponse> states = new List<GenericResponse>();
 	private List<GenericResponse> cities = new List<GenericResponse>();
 
+	public class StatesData
+	{
+		public string Name { get; set; }
+		public double Latitude { get; set; }
+		public double Longitude { get; set; }
+		public string Color { get; set; }
+		public string Shape { get; set; }
+	}
+
+	public class CitiesData
+	{
+		public string Name { get; set; }
+		public double Latitude { get; set; }
+		public double Longitude { get; set; }
+		public string Color { get; set; }
+		public string Shape { get; set; }
+	}
+
+	List<StatesData> statesData = new List<StatesData>()
+	{
+		new StatesData { Name="Rondônia", Latitude=-115057341, Longitude=-63580611, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Acre", Latitude=326088213, Longitude=-8547896759999990, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Amazonas", Latitude=-34168427, Longitude=-658560646, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Roraima", Latitude=15957682, Longitude=-6058206759999990, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Pará", Latitude=-6207102, Longitude=-5270279559999990, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Amapá", Latitude=14441146, Longitude=-520215415, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Tocantins", Latitude=-114098737, Longitude=-4871914229999990, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Maranhão", Latitude=-5080419, Longitude=-456007108, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Piauí", Latitude=-8322948799999990, Longitude=-431747162, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Ceará", Latitude=-54983977, Longitude=-393206241, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Rio Grande do Norte", Latitude=-5402580299999990, Longitude=-36954107, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Paraíba", Latitude=-7239960900000000, Longitude=-367819505, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Pernambuco", Latitude=-88137173, Longitude=-36954107, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Alagoas", Latitude=-95713058, Longitude=-367819505, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Sergipe", Latitude=-106738878, Longitude=-374681396, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Bahia", Latitude=-114098737, Longitude=-412808577, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Minas Gerais", Latitude=-17930178, Longitude=-437908453, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Espírito Santo", Latitude=-191834229, Longitude=-403088626, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Rio de Janeiro", Latitude=-229068467, Longitude=-431728965, Color="red", Shape="Pentagon" },
+		new StatesData { Name="São Paulo", Latitude=-235557714, Longitude=-466395571, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Paraná", Latitude=-252520888, Longitude=-520215415, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Santa Catarina", Latitude=-26928572, Longitude=-4936531489999990, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Rio Grande do Sul", Latitude=-293646459, Longitude=-516657692, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Mato Grosso do Sul", Latitude=-207722295, Longitude=-547851531, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Mato Grosso", Latitude=-126818712, Longitude=-56921099, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Goiás", Latitude=-157050424, Longitude=-4936531489999990, Color="red", Shape="Pentagon" },
+		new StatesData { Name="Distrito Federal", Latitude=-157975154, Longitude=-4789188739999990, Color="red", Shape="Pentagon" },
+	};
+	//new StatesData { Name="Brazil", Latitude=-14235004, Longitude=-5192528, Color="red", Shape="Pentagon" }
 	private int? selectedState = 0;
-	private LatLng? selectedStateCoors = new LatLng(0,0);
 
 	private int? selectedCity = 0;
-	private LatLng? selectedCityCoords = new LatLng(0,0);
 
 	private string? message;
 	private bool isLoading = false;
 
 	#region MAP
-	private Map? mapRef;
+	private string _googleMapsApiKey = "AIzaSyCB1T9fH2zNl6W_YEQKzsn7a-Ozoacnl4U";
+	private GeolocationData _jsMapCenter = new GeolocationData("Brazil");
+	private byte _jsMapZoomLevel = 10;
 
-	private LatLng? center;
-	private LatLng? firstMarkerLatLng;
-	private LatLng? secondMarkerLatLng;
-	private LatLng? thirdMarkerLatLng;
-	private Marker? marker1;
-	private Marker? marker2;
-	private Marker? marker3;
-
-
-	private MapOptions mapOptions = new MapOptions()
-		{
-			DivId = "mapId",
-			Center = new LatLng(-14.235, -5.192),
-			Zoom = 13,
-			UrlTileLayer = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-			SubOptions = new MapSubOptions()
-			{
-				Attribution = "&copy; <a lhref='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
-				TileSize = 512,
-				ZoomOffset = -1,
-				MaxZoom = 19,
-			}
-		};
+	private ObservableRangeCollection<GoogleMapMarker> _jsMarkers = new ObservableRangeCollection<GoogleMapMarker>();
+	private ObservableRangeCollection<GoogleMapMarker> _jsMarkersTmp = new ObservableRangeCollection<GoogleMapMarker>();
 	#endregion
 
 	protected override async Task OnInitializedAsync()
 	{
-		center = new LatLng(50.279133, 18.685578);
-		firstMarkerLatLng = new LatLng(50.284324, 18.664683);
-		secondMarkerLatLng = new LatLng(50.285495, 18.691064);
-		thirdMarkerLatLng = new LatLng(50.279103, 18.685534);
-
-		await GetStates();
 		await AddMarkers();
+		await GetStates();
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender) await JSRuntime.InvokeVoidAsync("initialize", null);
 	}
 
 	private async Task AddMarkers()
 	{
-		this.marker1 = await MarkerFactory.CreateAndAddToMap(this.firstMarkerLatLng, this.mapRef);
-		this.marker2 = await MarkerFactory.CreateAndAddToMap(this.secondMarkerLatLng, this.mapRef);
-		this.marker3 = await MarkerFactory.CreateAndAddToMap(this.thirdMarkerLatLng, this.mapRef);
+		Point point = new Point();
+		point.X = -115057341;
+		point.Y = -63580611;
+
+
+
+		//this.marker1 = await MarkerFactory.CreateAndAddToMap(this.firstMarkerLatLng, this.mapRef);
+		//this.marker2 = await MarkerFactory.CreateAndAddToMap(this.secondMarkerLatLng, this.mapRef);
+		//this.marker3 = await MarkerFactory.CreateAndAddToMap(this.thirdMarkerLatLng, this.mapRef);
 	}
 
 
@@ -157,91 +195,91 @@
 		}
 	}
 
-	private async Task GetStateLatLong(int? id)
-	{
-		switch (selectedState)
-		{
-			case 11:
-				new LatLng(-115057341, -63580611);
-				break;
-			case 12:
-				new LatLng(326088213, -8547896759999990);
-				break;
-			case 13:
-				new LatLng(-34168427, -658560646);
-				break;
-			case 14:
-				new LatLng(15957682, -6058206759999990);
-				break;
-			case 15:
-				new LatLng(-6207102, -5270279559999990);
-				break;
-			case 16:
-				new LatLng(14441146, -520215415);
-				break;
-			case 17:
-				new LatLng(-114098737, -4871914229999990);
-				break;
-			case 21:
-				new LatLng(-5080419, -456007108);
-				break;
-			case 22:
-				new LatLng(-8322948799999990, -431747162);
-				break;
-			case 23:
-				new LatLng(-54983977, -393206241);
-				break;
-			case 24:
-				new LatLng(-5402580299999990, -36954107);
-				break;
-			case 25:
-				new LatLng(-7239960900000000, -367819505);
-				break;
-			case 26:
-				new LatLng(-88137173, -36954107);
-				break;
-			case 27:
-				new LatLng(-95713058, -367819505);
-				break;
-			case 28:
-				new LatLng(-106738878, -374681396);
-				break;
-			case 29:
-				new LatLng(-114098737, -412808577);
-				break;
-			case 31:
-				new LatLng(-17930178, -437908453);
-				break;
-			case 32:
-				new LatLng(-191834229, -403088626);
-				break;
-			case 33:
-				new LatLng(-229068467, -431728965);
-				break;
-			case 35:
-				new LatLng(-235557714, -466395571);
-				break;
-			case 41:
-				new LatLng(-252520888, -520215415);
-				break;
-			case 42:
-				new LatLng(-26928572, -4936531489999990);
-				break;
-			case 43:
-				new LatLng(-293646459, -516657692);
-				break;
-			case 50:
-				new LatLng(-207722295, -547851531);
-				break;
-			case 51:
-				new LatLng(-126818712, -56921099);
-				break;
-			case 52:
-				new LatLng(-157050424, -4936531489999990);
-				break;
-			case 53:
-				new LatLng(-157975154, -4789188739999990);
-				break;
-		}
-	}
+	//private async Task GetStateLatLong(int? id)
+	//{
+	//	switch (selectedState)
+	//	{
+	//		case 11:
+	//			new LatLng(-115057341, -63580611);
+	//			break;
+	//		case 12:
+	//			new LatLng(326088213, -8547896759999990);
+	//			break;
+	//		case 13:
+	//			new LatLng(-34168427, -658560646);
+	//			break;
+	//		case 14:
+	//			new LatLng(15957682, -6058206759999990);
+	//			break;
+	//		case 15:
+	//			new LatLng(-6207102, -5270279559999990);
+	//			break;
+	//		case 16:
+	//			new LatLng(14441146, -520215415);
+	//			break;
+	//		case 17:
+	//			new LatLng(-114098737, -4871914229999990);
+	//			break;
+	//		case 21:
+	//			new LatLng(-5080419, -456007108);
+	//			break;
+	//		case 22:
+	//			new LatLng(-8322948799999990, -431747162);
+	//			break;
+	//		case 23:
+	//			new LatLng(-54983977, -393206241);
+	//			break;
+	//		case 24:
+	//			new LatLng(-5402580299999990, -36954107);
+	//			break;
+	//		case 25:
+	//			new LatLng(-7239960900000000, -367819505);
+	//			break;
+	//		case 26:
+	//			new LatLng(-88137173, -36954107);
+	//			break;
+	//		case 27:
+	//			new LatLng(-95713058, -367819505);
+	//			break;
+	//		case 28:
+	//			new LatLng(-106738878, -374681396);
+	//			break;
+	//		case 29:
+	//			new LatLng(-114098737, -412808577);
+	//			break;
+	//		case 31:
+	//			new LatLng(-17930178, -437908453);
+	//			break;
+	//		case 32:
+	//			new LatLng(-191834229, -403088626);
+	//			break;
+	//		case 33:
+	//			new LatLng(-229068467, -431728965);
+	//			break;
+	//		case 35:
+	//			new LatLng(-235557714, -466395571);
+	//			break;
+	//		case 41:
+	//			new LatLng(-252520888, -520215415);
+	//			break;
+	//		case 42:
+	//			new LatLng(-26928572, -4936531489999990);
+	//			break;
+	//		case 43:
+	//			new LatLng(-293646459, -516657692);
+	//			break;
+	//		case 50:
+	//			new LatLng(-207722295, -547851531);
+	//			break;
+	//		case 51:
+	//			new LatLng(-126818712, -56921099);
+	//			break;
+	//		case 52:
+	//			new LatLng(-157050424, -4936531489999990);
+	//			break;
+	//		case 53:
+	//			new LatLng(-157975154, -4789188739999990);
+	//			break;
+	//	}
+	//}
 }
